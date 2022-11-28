@@ -24,47 +24,48 @@ local get_item_method = quest_hunter_info_type_def:get_method("get_Item");
 local hunter_info_type_def = sdk.find_type_definition("snow.LobbyManager.HunterInfo");
 local member_index_field = hunter_info_type_def:get_field("_memberIndex");
 
-function damage_meter_UI.get_players(player_info_list)
+function damage_meter_UI.get_players(player_info_list, otomo_info_list)
 	local cached_config = config.current_config.damage_meter_UI;
+
+	local quest_players = {};
 
 	-- other players
 	if player_info_list == nil then
 		customization_menu.status = "No player info list";
 		return {};
-	end
+	else
+		local count = get_count_method:call(player_info_list);
 
-	local quest_players = {};
-
-	local count = get_count_method:call(player_info_list);
-
-	if count == nil then
-		customization_menu.status = "No player info list count";
-		return {};
-	end
-
-	for i = 0, count - 1 do
-		local player_info = get_item_method:call(player_info_list, i);
-
-		if player_info == nil then
-			goto continue
+		if count == nil then
+			customization_menu.status = "No player info list count";
+			return {};
 		end
-
-		local player_id = member_index_field:get_data(player_info);
-		if player_id == nil then
-			goto continue
-		end
-
-		local _player = player.get_player(player_id);
-		if _player ~= nil then
-			if _player == player.myself and cached_config.settings.my_damage_bar_location ~= "Normal" then
+	
+		for i = 0, count - 1 do
+			local player_info = get_item_method:call(player_info_list, i);
+	
+			if player_info == nil then
 				goto continue
 			end
-			table.insert(quest_players, _player);
+	
+			local player_id = member_index_field:get_data(player_info);
+			if player_id == nil then
+				goto continue
+			end
+	
+			local _player = player.get_player(player_id);
+			if _player ~= nil then
+				if _player == player.myself and cached_config.settings.my_damage_bar_location ~= "Normal" then
+					goto continue
+				end
+				table.insert(quest_players, _player);
+			end
+	
+			::continue::
 		end
-
-		::continue::
 	end
 
+	-- servants
 	if cached_config.settings.show_followers_separately then
 		for id, non_player in pairs(non_players.servant_list) do
 			table.insert(quest_players, non_player);
@@ -81,16 +82,30 @@ function damage_meter_UI.draw()
 	if player.total.display.total_damage == 0 and cached_config.settings.hide_module_if_total_damage_is_zero then
 		return;
 	end
+	
+	xy = 1;
+
+	--local otomo_info_list = "";
 
 	local quest_players = {};
 	if damage_meter_UI.freeze_displayed_players and damage_meter_UI.last_displayed_players ~= {} then
 		quest_players = damage_meter_UI.last_displayed_players;
 	elseif quest_status.flow_state == quest_status.flow_states.IN_LOBBY or quest_status.flow_state == quest_status.flow_states.IN_TRAINING_AREA then
 		local player_info_list = hunter_info_field:get_data(singletons.lobby_manager);
-		quest_players = damage_meter_UI.get_players(player_info_list);
+
+		if cached_config.settings.show_my_otomos_separately or cached_config.settings.show_others_otomos_separately then
+			--otomo_info_list = otomo_info_field:get_data(singletons.lobby_manager);
+		end
+
+		quest_players = damage_meter_UI.get_players(player_info_list, otomo_info_list);
 	else
 		local player_info_list = quest_hunter_info_field:get_data(singletons.lobby_manager);
-		quest_players = damage_meter_UI.get_players(player_info_list);
+
+		if cached_config.settings.show_my_otomos_separately or cached_config.settings.show_others_otomos_separately then
+			--otomo_info_list = quest_otomo_info_field:get_data(singletons.lobby_manager);
+		end
+
+		quest_players = damage_meter_UI.get_players(player_info_list, otomo_info_list);
 	end
 
 	if not damage_meter_UI.freeze_displayed_players then

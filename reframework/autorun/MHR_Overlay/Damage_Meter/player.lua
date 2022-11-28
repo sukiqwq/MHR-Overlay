@@ -8,6 +8,7 @@ local time;
 local quest_status;
 local drawing;
 local language;
+local non_players;
 
 player.list = {};
 player.myself = nil;
@@ -327,6 +328,8 @@ function player.update_player_list(is_on_quest)
 	else
 		player.update_player_list_(hunter_info_field);
 	end
+
+	--non_players.update_otomo_list(is_on_quest);
 end
 
 function player.update_player_list_(hunter_info_field_)
@@ -502,6 +505,7 @@ function player.init_module()
 	quest_status = require("MHR_Overlay.Game_Handler.quest_status");
 	drawing = require("MHR_Overlay.UI.drawing");
 	language = require("MHR_Overlay.Misc.language");
+	non_players = require("MHR_Overlay.Damage_Meter.non_players");
 
 	player.init();
 end
