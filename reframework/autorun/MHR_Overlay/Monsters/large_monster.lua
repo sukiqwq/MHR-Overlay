@@ -146,6 +146,57 @@ local get_set_info_method = enemy_character_base_type_def:get_method("get_SetInf
 local set_info_type = get_set_info_method:get_return_type();
 local get_unique_id_method = set_info_type:get_method("get_UniqueId");
 
+local physical_param_field = enemy_character_base_type_def:get_field("<PhysicalParam>k__BackingField");
+local stamina_param_field = enemy_character_base_type_def:get_field("<StaminaParam>k__BackingField");
+local anger_param_field = enemy_character_base_type_def:get_field("<AngerParam>k__BackingField");
+local damage_param_field = enemy_character_base_type_def:get_field("<DamageParam>k__BackingField");
+local curia_param_field = enemy_character_base_type_def:get_field("<CuriaParam>k__BackingField");
+
+local check_die_method = enemy_character_base_type_def:get_method("checkDie");
+local is_disp_icon_mini_map_method = enemy_character_base_type_def:get_method("isDispIconMiniMap");
+
+local physical_param_type = physical_param_field:get_type();
+local get_vital_method = physical_param_type:get_method("getVital");
+local get_capture_hp_vital_method = physical_param_type:get_method("get_CaptureHpVital");
+
+local vital_param_type = get_vital_method:get_return_type();
+local get_current_method = vital_param_type:get_method("get_Current");
+local get_max_method = vital_param_type:get_method("get_Max");
+
+local stamina_param_type = stamina_param_field:get_type();
+local is_tired_method = stamina_param_type:get_method("isTired");
+local get_stamina_method = stamina_param_type:get_method("getStamina");
+local get_max_stamina_method = stamina_param_type:get_method("getMaxStamina");
+
+local get_remaining_tired_time_method = stamina_param_type:get_method("getStaminaRemainingTime");
+local get_total_tired_time_method = stamina_param_type:get_method("get_TiredSec");
+
+local anger_param_type = anger_param_field:get_type();
+local is_anger_method = anger_param_type:get_method("isAnger");
+local get_anger_point_method = anger_param_type:get_method("get_AngerPoint");
+local get_limit_anger_method = anger_param_type:get_method("get_LimitAnger");
+
+local get_remaining_anger_time_method = anger_param_type:get_method("getAngerRemainingTime");
+local get_total_anger_time_method = anger_param_type:get_method("get_TimerAnger");
+
+local mario_param_field = enemy_character_base_type_def:get_field("<MarioParam>k__BackingField");
+
+local mario_param_type = mario_param_field:get_type();
+local get_is_marionette_method = mario_param_type:get_method("get_IsMarionette");
+local get_mario_player_index_method = mario_param_type:get_method("get_MarioPlayerIndex");
+
+local damage_param_type_def = damage_param_field:get_type();
+local capture_param_field = damage_param_type_def:get_field("_CaptureParam");
+
+local capture_param_type_def = capture_param_field:get_type();
+local get_is_enable_method = capture_param_type_def:get_method("get_IsEnable");
+
+local get_pos_field = enemy_character_base_type_def:get_method("get_Pos");
+
+local system_array_type_def = sdk.find_type_definition("System.Array");
+local length_method = system_array_type_def:get_method("get_Length");
+local get_value_method = system_array_type_def:get_method("GetValue(System.Int32)");
+
 function large_monster.init(monster, enemy)
 	local enemy_type = enemy_type_field:get_data(enemy);
 	if enemy_type == nil then
@@ -207,20 +258,20 @@ function large_monster.init(monster, enemy)
 
 	local is_capture_enable = true;
 
-	local damage_param = enemy:get_field("<DamageParam>k__BackingField");
+	local damage_param = damage_param_field:get_data(enemy);
 	if damage_param ~= nil then
-		local capture_param = damage_param:get_field("_CaptureParam");
+		local capture_param = capture_param_field:get_data(damage_param);
 
 		if capture_param ~= nil then
-			local is_capture_enable_ = capture_param:call("get_IsEnable");
+			local is_capture_enable_ = get_is_enable_method:call(capture_param);
 			if is_capture_enable_ ~= nil then
 				is_capture_enable = is_capture_enable_;
 			end
 		end
 	end
 
-	--local curia_param = enemy:get_field("<CuriaParam>k__BackingField");
-	local is_anomaly = false;--curia_param ~= nil;
+	local curia_param = curia_param_field:get_data(enemy);
+	local is_anomaly = curia_param ~= nil;
 
 	monster.is_capturable = is_capture_enable and not is_anomaly;
 end
@@ -304,50 +355,6 @@ function large_monster.init_UI(monster, monster_UI, cached_config)
 		cached_config.ailment_buildups.total_buildup_value_label
 	);
 end
-
-local physical_param_field = enemy_character_base_type_def:get_field("<PhysicalParam>k__BackingField");
-local stamina_param_field = enemy_character_base_type_def:get_field("<StaminaParam>k__BackingField");
-local anger_param_field = enemy_character_base_type_def:get_field("<AngerParam>k__BackingField");
-local damage_param_field = enemy_character_base_type_def:get_field("<DamageParam>k__BackingField");
-
-local check_die_method = enemy_character_base_type_def:get_method("checkDie");
-local is_disp_icon_mini_map_method = enemy_character_base_type_def:get_method("isDispIconMiniMap");
-
-local physical_param_type = physical_param_field:get_type();
-local get_vital_method = physical_param_type:get_method("getVital");
-local get_capture_hp_vital_method = physical_param_type:get_method("get_CaptureHpVital");
-
-local vital_param_type = get_vital_method:get_return_type();
-local get_current_method = vital_param_type:get_method("get_Current");
-local get_max_method = vital_param_type:get_method("get_Max");
-
-local stamina_param_type = stamina_param_field:get_type();
-local is_tired_method = stamina_param_type:get_method("isTired");
-local get_stamina_method = stamina_param_type:get_method("getStamina");
-local get_max_stamina_method = stamina_param_type:get_method("getMaxStamina");
-
-local get_remaining_tired_time_method = stamina_param_type:get_method("getStaminaRemainingTime");
-local get_total_tired_time_method = stamina_param_type:get_method("get_TiredSec");
-
-local anger_param_type = anger_param_field:get_type();
-local is_anger_method = anger_param_type:get_method("isAnger");
-local get_anger_point_method = anger_param_type:get_method("get_AngerPoint");
-local get_limit_anger_method = anger_param_type:get_method("get_LimitAnger");
-
-local get_remaining_anger_time_method = anger_param_type:get_method("getAngerRemainingTime");
-local get_total_anger_time_method = anger_param_type:get_method("get_TimerAnger");
-
-local mario_param_field = enemy_character_base_type_def:get_field("<MarioParam>k__BackingField");
-
-local mario_param_type = mario_param_field:get_type();
-local get_is_marionette_method = mario_param_type:get_method("get_IsMarionette");
-local get_mario_player_index_method = mario_param_type:get_method("get_MarioPlayerIndex");
-
-local get_pos_field = enemy_character_base_type_def:get_method("get_Pos");
-
-local system_array_type_def = sdk.find_type_definition("System.Array");
-local length_method = system_array_type_def:get_method("get_Length");
-local get_value_method = system_array_type_def:get_method("GetValue(System.Int32)");
 
 function large_monster.update_position(enemy, monster)
 	if not config.current_config.large_monster_UI.dynamic.enabled and
