@@ -219,8 +219,8 @@ function large_monster.init(monster, enemy)
 		end
 	end
 
-	local curia_param = enemy:get_field("<CuriaParam>k__BackingField");
-	local is_anomaly = curia_param ~= nil;
+	--local curia_param = enemy:get_field("<CuriaParam>k__BackingField");
+	local is_anomaly = false;--curia_param ~= nil;
 
 	monster.is_capturable = is_capture_enable and not is_anomaly;
 end
